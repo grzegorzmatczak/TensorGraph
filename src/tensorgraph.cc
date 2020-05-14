@@ -157,11 +157,11 @@ void TensorGraph::selectImage(cv::Mat &imageMat)
     cv::resize(imageMat, ImageProcess, s, 0, 0, cv::INTER_CUBIC);
     H_Logger->trace("resize to({},{})", m_inputHeight, m_inputWidth);
     int depth = ImageProcess.channels();
-    H_Logger->trace("TensorGraph::selectImage2() depth:{}", depth);
+    H_Logger->trace("TensorGraph::selectImage() depth:{}", depth);
     if (depth == 3 || depth == 4)
     {
       cv::cvtColor(ImageProcess, ImageProcess, 6);
-      H_Logger->trace("TensorGraph::selectImage2() cvtColor");
+      H_Logger->trace("TensorGraph::selectImage() cvtColor");
     }
 
     // creating a Tensor for storing the data
@@ -189,13 +189,13 @@ void TensorGraph::selectImage(cv::Mat &imageMat)
         }
       }
     }
-    H_Logger->trace("TensorGraph::selectImage2() run_status");
+    H_Logger->trace("TensorGraph::selectImage() run_status");
     tensorflow::Status run_status =
         (m_session)->Run({ { m_inputLayer, input_tensor } }, { m_outputLayer }, {}, &m_outputs);
   }
   else
   {
-    H_Logger->error("TensorGraph::selectImage2() failed resize image");
+    H_Logger->error("TensorGraph::selectImage() failed resize image");
   }
 }
 
