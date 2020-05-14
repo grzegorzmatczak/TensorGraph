@@ -66,7 +66,6 @@ void TensorGraph::initMobilnet()
   m_rootDir = "";
 }
 
-// Reads a model graph definition from disk, and creates a session object you can use to run it.
 tensorflow::Status TensorGraph::LoadGraph(const tensorflow::string &graph_file_name,
                                           std::unique_ptr<tensorflow::Session> *session)
 {
@@ -147,7 +146,6 @@ void TensorGraph::initModel()
   }
   m_how_many_labels = (int)(m_label_count);
   H_Logger->debug("TensorGraph::initModel() m_how_many_labels:{}", m_how_many_labels);
-  H_Logger->debug("TensorGraph::initModel() read_labels_status:{}", read_labels_status.ok());
 }
 
 void TensorGraph::selectImage(cv::Mat &imageMat)
@@ -201,8 +199,6 @@ void TensorGraph::selectImage(cv::Mat &imageMat)
   }
 }
 
-// Analyzes the output of the Inception graph to retrieve the highest scores and
-// their positions in the tensor, which correspond to categories.
 tensorflow::Status TensorGraph::GetTopLabels(const std::vector<tensorflow::Tensor> &outputs,
                                              tensorflow::Tensor *indices, tensorflow::Tensor *scores)
 {
@@ -211,15 +207,11 @@ tensorflow::Status TensorGraph::GetTopLabels(const std::vector<tensorflow::Tenso
 
   tensorflow::string output_name = "top_k";
   TopK(root.WithOpName(output_name), m_outputs[0], m_how_many_labels);
-  // This runs the GraphDef network definition that we've just constructed, and
-  // returns the results in the output tensors.
   tensorflow::GraphDef graph;
   TF_RETURN_IF_ERROR(root.ToGraphDef(&graph));
 
   std::unique_ptr<tensorflow::Session> session(tensorflow::NewSession(tensorflow::SessionOptions()));
   TF_RETURN_IF_ERROR(session->Create(graph));
-  // The TopK node returns two outputs, the scores and their original indices,
-  // so we have to append :0 and :1 to specify them both.
   std::vector<tensorflow::Tensor> out_tensors;
   TF_RETURN_IF_ERROR(session->Run({}, { output_name + ":0", output_name + ":1" }, {}, &out_tensors));
   *scores = out_tensors[0];
@@ -227,9 +219,6 @@ tensorflow::Status TensorGraph::GetTopLabels(const std::vector<tensorflow::Tenso
   return tensorflow::Status::OK();
 }
 
-// Takes a file name, and loads a list of labels from it, one per line, and
-// returns a vector of the strings. It pads with empty strings so the length
-// of the result is a multiple of 16, because our model expects that.
 tensorflow::Status TensorGraph::ReadLabelsFile(const tensorflow::string &file_name,
                                                std::vector<tensorflow::string> *result, size_t *found_m_label_count)
 {
@@ -257,27 +246,19 @@ tensorflow::Status TensorGraph::ReadLabelsFile(const tensorflow::string &file_na
   return tensorflow::Status::OK();
 }
 
-// Given the output of a model run, and the name of a file containing the labels
-// this prints out the top One highest-scoring values.
 struct topScore TensorGraph::returnTopLabel()
 {
   struct topScore topScoreOutput;
-
-  // SPDLOG_DEBUG(console, "read_labels_status:{}",read_labels_status.ok());
   int _how_many_labels = std::min(3, (int)(m_label_count));
   tensorflow::Tensor indices;
   tensorflow::Tensor scores;
-  // SPDLOG_DEBUG(console, "init to show labels");
-
   tensorflow::Status getTopLabels_status = (GetTopLabels(m_outputs, &indices, &scores));
   if (!getTopLabels_status.ok())
   {
     H_Logger->error("getTopLabels_status failed!");
   }
   tensorflow::TTypes<float>::Flat scores_flat = scores.flat<float>();
-  // SPDLOG_DEBUG(console, "init to show labels...");
   tensorflow::TTypes<tensorflow::int32>::Flat indices_flat = indices.flat<tensorflow::int32>();
-  // SPDLOG_DEBUG(console, "init to show labels complete");
   for (int pos = 0; pos < _how_many_labels; ++pos)
   {
     const int label_index = indices_flat(pos);
@@ -292,8 +273,6 @@ struct topScore TensorGraph::returnTopLabel()
   return topScoreOutput;
 }
 
-// Given the output of a model run, and the name of a file containing the labels
-// this prints out the top One highest-scoring values.
 struct allScoreData TensorGraph::returnAllLabel()
 {
   int _how_many_labels = (int)(m_label_count);
