@@ -2,8 +2,8 @@
 	
         "TensorFlow":
         {
-            "Graph" : "/media/user/36A49AFCA49ABE35/genetic/repo/FisherTrack/tensorflow/ROI_output_graph_gmatczak.pb",
-            "Labels" : "/media/user/36A49AFCA49ABE35/genetic/repo/FisherTrack/tensorflow/ROI_output_labels_gmatczak.txt"
+            "Graph" : "/media/user/36A49AFCA49ABE35/genetic/repo/FisherTrack/tensorflow/fast_output_graph_WROCLAW.pb",
+            "Labels" : "/media/user/36A49AFCA49ABE35/genetic/repo/FisherTrack/tensorflow/fast_output_labels_WROCLAW.txt"
         },
 
         "General":

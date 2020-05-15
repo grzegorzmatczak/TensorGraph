@@ -19,7 +19,7 @@ MainLoop::MainLoop(QJsonObject const &a_config)
 
   allScoreDataOutput = m_tensor->returnAllLabel();
 
-  for (unsigned int pos = 0; pos < allScoreDataOutput.labels.size(); ++pos)
+  for (unsigned int pos = 0; pos < allScoreDataOutput.labels.size(); pos++)
   {
     H_Logger->trace("[{}]:{}", pos, static_cast<double>(allScoreDataOutput.scores[pos]));
   }

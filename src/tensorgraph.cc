@@ -238,6 +238,7 @@ tensorflow::Status TensorGraph::ReadLabelsFile(const tensorflow::string &file_na
     result->push_back(line);
   }
   *found_m_label_count = result->size();
+
   const int padding = 16;
   while (result->size() % padding)
   {
@@ -249,7 +250,7 @@ tensorflow::Status TensorGraph::ReadLabelsFile(const tensorflow::string &file_na
 struct topScore TensorGraph::returnTopLabel()
 {
   struct topScore topScoreOutput;
-  int _how_many_labels = std::min(3, (int)(m_label_count));
+  int _how_many_labels = std::min(1, (int)(m_label_count));
   tensorflow::Tensor indices;
   tensorflow::Tensor scores;
   tensorflow::Status getTopLabels_status = (GetTopLabels(m_outputs, &indices, &scores));
@@ -259,12 +260,13 @@ struct topScore TensorGraph::returnTopLabel()
   }
   tensorflow::TTypes<float>::Flat scores_flat = scores.flat<float>();
   tensorflow::TTypes<tensorflow::int32>::Flat indices_flat = indices.flat<tensorflow::int32>();
+  /*
   for (int pos = 0; pos < _how_many_labels; ++pos)
   {
     const int label_index = indices_flat(pos);
     const float score = scores_flat(pos);
     H_Logger->trace("TensorGraph:: {}({}):{}", m_labelsOutput[label_index], label_index, score);
-  }
+  }*/
 
   topScoreOutput.indice = indices_flat(0);
   topScoreOutput.score = scores_flat(0);
@@ -276,6 +278,7 @@ struct topScore TensorGraph::returnTopLabel()
 struct allScoreData TensorGraph::returnAllLabel()
 {
   int _how_many_labels = (int)(m_label_count);
+  H_Logger->trace("TensorGraph::returnAllLabel() _how_many_labels:{}", _how_many_labels);
   tensorflow::Tensor indices;
   tensorflow::Tensor scores;
 
@@ -295,15 +298,17 @@ struct allScoreData TensorGraph::returnAllLabel()
     topScoreDataOutput.labels.push_back("0");
   }
 
-  for (int pos = 0; pos < _how_many_labels; ++pos)
+  for (int pos = 0; pos < _how_many_labels; pos++)
   {
+    // H_Logger->trace("TensorGraph::pos{}", pos);
     int label_index = indices_flat(pos); // indices_flat(pos);
+    // H_Logger->trace("TensorGraph::label_index:{}", label_index);
     topScoreDataOutput.indices[label_index] = label_index;
-
+    // H_Logger->trace("TensorGraph::m_labelsOutput[label_index]:{}", m_labelsOutput[label_index]);
     float score = scores_flat(pos); // scores_flat(pos);
     topScoreDataOutput.scores[label_index] = score;
     topScoreDataOutput.labels[label_index] = m_labelsOutput[label_index];
-    H_Logger->trace("TensorGraph:: {}({}):{}", m_labelsOutput[label_index], label_index, score);
+    H_Logger->trace("TensorGraph::[{}]: {}({}):{}", pos, m_labelsOutput[label_index], label_index, score);
   }
   return topScoreDataOutput;
 }
